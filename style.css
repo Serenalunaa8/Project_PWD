@@ -1,0 +1,83 @@
+body {
+      background: linear-gradient(to bottom, #1f1f3a, #2b2b4a);
+      color: white;
+      min-height: 100vh;
+    }
+    .rounded-full {
+      border-radius: 9999px;
+    }
+    .scroll-x {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .scroll-x button {
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+    .custom-placeholder::placeholder {
+    color: #c4c4c4; /* abu-abu */
+    opacity: 1; /* agar tidak transparan */
+  }
+  h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+  }
+
+   .song-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .song-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .song-left img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 0.5rem;
+    }
+
+    .song-info p {
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-info small {
+      color: #ccc;
+    }
+
+    .song-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .song-right i {
+      font-size: 1.2rem;
+      color: #ccc;
+      cursor: pointer;
+    }
+
+    .song-right small {
+      color: #ccc;
+    }
+
+    .song-number {
+      width: 2rem;
+      text-align: right;
+      color: #aaa;
+      flex-shrink: 0;
+    }
+  
