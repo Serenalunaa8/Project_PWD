@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Ambil data lagu favorit user
 $sql = "SELECT s.*, a.name AS artist_name 
         FROM favorites f
         JOIN songs s ON f.song_id = s.id
@@ -26,8 +25,8 @@ $favorite_count = $result->num_rows;
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StreamBeat - Favorite</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <style>
@@ -35,9 +34,6 @@ $favorite_count = $result->num_rows;
       background: linear-gradient(to bottom, #1f1f3a, #2b2b4a);
       color: white;
       min-height: 100vh;
-    }
-    .custom-placeholder::placeholder {
-      color: #c4c4c4;
     }
     .playlist-header {
       display: flex;
@@ -59,10 +55,6 @@ $favorite_count = $result->num_rows;
     }
     .playlist-info {
       margin-left: 20px;
-    }
-    h1 {
-      font-size: 48px;
-      margin: 5px 0;
     }
     .song-row {
       transition: background-color 0.3s;
@@ -92,21 +84,14 @@ $favorite_count = $result->num_rows;
       background-color: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(10px);
     }
+  
   </style>
 </head>
-<body>
-<header class="navbar navbar-expand-lg px-3 py-3" style="background: linear-gradient(135deg, #4a148c, #303f9f);">
-  <div class="container-fluid">
-    <a class="navbar-brand text-light fw-bold" href="#">🎧 My Music</a>
-    <form method="POST" class="d-flex align-items-center bg-dark text-white px-3 py-2 rounded-pill" style="max-width: 400px;">
-      <i class="bi bi-search me-2"></i>
-      <input type="text" class="form-control bg-dark text-white border-0 shadow-none px-0 custom-placeholder" name="search_query" placeholder="What do you want to play?" style="flex: 1;">
-      <div class="vr mx-3"></div>
-      <button class="btn btn-dark p-0" type="submit"><i class="bi bi-archive-fill"></i></button>
-    </form>
-  </div>
-</header>
+<body data-user-id="<?= $user_id ?>">
 
+<?php include 'header.php'; ?>
+
+<br>
 <main>
   <section class="container py-5">
     <div class="playlist-header rounded-4 p-4 mb-4">
@@ -126,11 +111,11 @@ $favorite_count = $result->num_rows;
       if ($favorite_count > 0):
         while ($row = $result->fetch_assoc()):
       ?>
-      <div class="song-row d-flex align-items-center py-2 px-3" data-song-id="<?= $row['id'] ?>">
+      <div class="song-row d-flex align-items-center py-2 px-3">
         <div class="song-number"><?= $rank++ ?></div>
         <div class="song-title d-flex align-items-center">
-          <button class="favorite-btn me-3" title="Remove from favorites">
-            <i class="bi bi-heart-fill fs-5"></i>
+          <button class="favorite-btn me-3" title="Remove from favorites" data-song-id="<?= $row['id'] ?>" data-user-id="<?= $user_id ?>">
+            <i class="bi bi-heart-fill fs-5 text-danger"></i>
           </button>
           <div>
             <div><?= htmlspecialchars($row['title']) ?></div>
@@ -138,7 +123,9 @@ $favorite_count = $result->num_rows;
           </div>
         </div>
         <div class="song-duration">
-          <button class="btn btn-sm text-white p-0 play-btn" data-song-url="<?= $row['song_url'] ?>">
+          <button class="btn btn-sm text-white p-0 playPauseBtn" 
+                  data-song-url="<?= htmlspecialchars($row['song_url']) ?>"
+                  data-song-id="<?= $row['id'] ?>">
             <i class="bi bi-play-circle-fill fs-5"></i>
           </button>
         </div>
@@ -150,57 +137,134 @@ $favorite_count = $result->num_rows;
   </section>
 </main>
 
-<footer class="position-fixed bottom-0 start-50 translate-middle-x mb-3 px-4 py-2 rounded-pill d-flex justify-content-between align-items-center shadow-lg" style="width: 90%; z-index: 999;">
-  <a href="home.php" class="btn btn-link text-white fs-5 p-0">
-    <i class="bi bi-house-door-fill active-icon"></i>
-  </a>
-  <button class="btn btn-link text-white fs-5 p-0"><i class="bi bi-search"></i></button>
-  <button class="btn btn-link text-white fs-5 p-0"><i class="bi bi-music-note-beamed"></i></button>
-  <button class="btn btn-link text-white fs-5 p-0"><i class="bi bi-person"></i></button>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<audio id="audioPlayer" style="display:none;"></audio>
+<?php include 'footer.php'; ?>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const audio = document.getElementById("audioPlayer");
+// Fungsi untuk menginisialisasi pemutar audio
+function initAudioPlayer() {
+    const audioPlayer = new Audio();
+    audioPlayer.style.display = 'none';
+    document.body.appendChild(audioPlayer);
+    
+    let currentButton = null;
+    let currentSongId = null;
 
-  // Play button
-  document.querySelectorAll(".play-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const url = btn.dataset.songUrl;
-      if (audio.src !== url) {
-        audio.src = url;
-      }
-      audio.play();
-    });
-  });
-
-  // Favorite toggle (unfavorite)
-  document.querySelectorAll(".favorite-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const row = btn.closest(".song-row");
-      const songId = row.dataset.songId;
-
-      fetch("save_favorite.php", {
-        method: "POST",
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: "song_id=" + songId
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          row.remove(); // remove dari DOM
-        } else {
-          alert("Gagal menghapus dari favorit.");
+    // Fungsi untuk menangani play/pause
+    function handlePlayPause(button, songUrl, songId, userId) {
+        const icon = button.querySelector('i');
+        
+        // Jika lagu yang sama diklik
+        if (currentSongId === songId) {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                icon.classList.replace('bi-play-circle-fill', 'bi-pause-circle-fill');
+            } else {
+                audioPlayer.pause();
+                icon.classList.replace('bi-pause-circle-fill', 'bi-play-circle-fill');
+            }
+            return;
         }
-      })
-      .catch(err => console.error("Error:", err));
+
+        // Jika lagu baru diklik
+        if (currentButton) {
+            const prevIcon = currentButton.querySelector('i');
+            prevIcon.classList.replace('bi-pause-circle-fill', 'bi-play-circle-fill');
+        }
+
+        audioPlayer.src = songUrl;
+        audioPlayer.play();
+        icon.classList.replace('bi-play-circle-fill', 'bi-pause-circle-fill');
+        
+        // Simpan riwayat pemutaran
+        savePlayHistory(songId, userId);
+        
+        currentButton = button;
+        currentSongId = songId;
+    }
+
+    // Event ketika audio selesai
+    audioPlayer.addEventListener('ended', () => {
+        if (currentButton) {
+            const icon = currentButton.querySelector('i');
+            icon.classList.replace('bi-pause-circle-fill', 'bi-play-circle-fill');
+        }
+        currentSongId = null;
+        currentButton = null;
     });
-  });
+
+    return {
+        handlePlayPause
+    };
+}
+
+// Fungsi untuk menyimpan riwayat pemutaran
+function savePlayHistory(songId, userId) {
+    if (!songId || !userId) return;
+    
+    fetch("save_play_history.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `id_lagu=${songId}&id_pengguna=${userId}`
+    }).catch(err => console.error('Gagal menyimpan riwayat:', err));
+}
+
+// Fungsi untuk menangani favorit
+function initFavoriteButtons() {
+    document.querySelectorAll('.favorite-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const songId = this.dataset.songId;
+            const userId = this.dataset.userId;
+            const icon = this.querySelector('i');
+            
+            fetch("save_favorite.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `song_id=${songId}&user_id=${userId}`
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Network response was not ok");
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    icon.classList.toggle('bi-heart');
+                    icon.classList.toggle('bi-heart-fill');
+                    icon.classList.toggle('text-danger');
+                    // Optionally remove the song row from UI
+                    if (data.action === 'removed') {
+                        this.closest('.song-row').remove();
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+}
+
+// Inisialisasi ketika DOM siap
+document.addEventListener('DOMContentLoaded', () => {
+    const audioPlayer = initAudioPlayer();
+    const userId = document.body.dataset.userId;
+    
+    // Atur event listener untuk tombol play
+    document.querySelectorAll('.playPauseBtn').forEach(button => {
+        button.addEventListener('click', function() {
+            audioPlayer.handlePlayPause(
+                this,
+                this.dataset.songUrl,
+                this.dataset.songId,
+                userId
+            );
+        });
+    });
+    
+    // Inisialisasi tombol favorit
+    initFavoriteButtons();
 });
-
-
+</script>
 </body>
 </html>

@@ -1,31 +1,23 @@
 <?php
 session_start();
-include 'koneksi.php';
+include "koneksi.php";
 
-$username = trim($_POST['username']);
-$password = $_POST['password'];
+$username = mysqli_real_escape_string($konek, $_POST['username']);
+$password = mysqli_real_escape_string($konek, $_POST['password']);
 
-// Validasi input kosong
-if (empty($username) || empty($password)) {
-    header("Location: index.php?pesan=error");
-    exit();
-}
+$sql = "SELECT * FROM user WHERE username = '$username' AND password = '$password'";
+$query = mysqli_query($konek, $sql) or die("Query error: " . mysqli_error($konek));
 
-// Query untuk memeriksa username dan password
-$query = "SELECT * FROM User WHERE Username = ? AND Password = ?";
-$stmt = mysqli_prepare($konek, $query);
-mysqli_stmt_bind_param($stmt, "ss", $username, $password);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
+if ($query && mysqli_num_rows($query) === 1) {
+    $user = mysqli_fetch_assoc($query);
 
-if ($data = mysqli_fetch_assoc($result)) {
-    // Jika username dan password cocok
-    $_SESSION['username'] = $data['Username'];
-    header("Location: home.php"); // Redirect ke halaman home
-    exit();
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['user_id'] = $user['id'];
+
+    header("Location: home.php");
+    exit;
 } else {
-    // Jika username atau password salah
-    header("Location: index.php?pesan=invalid");
-    exit();
+    header("Location: index.php?pesan=gagal");
+    exit;
 }
 ?>

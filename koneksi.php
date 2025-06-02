@@ -1,12 +1,6 @@
 <?php
-$host = "localhost";
-$username = "root";
-$password = "";
-$database = "music_streaming";
-
-$konek = new mysqli($host, $username, $password, $database);
-
-if ($konek->connect_error) {
-    die("Connection failed: " . $konek->connect_error);
+$konek = mysqli_connect("localhost", "root", "", "streaming_music");
+if (!$konek) {
+    die("Koneksi gagal: " . mysqli_connect_error());
 }
 ?>

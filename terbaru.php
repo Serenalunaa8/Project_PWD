@@ -6,11 +6,11 @@ if (!isset($_SESSION['username'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-$sql = "SELECT s.id, s.title AS judul_lagu, a.name AS nama_artis, s.cover_image_url, s.song_url, s.created_at
+$sql = "SELECT s.id, s.title AS judul_lagu, a.name AS nama_artis, s.cover_image_url, s.song_url, s.created_at, s.play_count
         FROM songs s
         JOIN artists a ON s.artist_id = a.id
         ORDER BY s.created_at DESC
-        LIMIT 10";
+        LIMIT 20";
 $result = $konek->query($sql);
 
 // Ambil daftar lagu favorit pengguna
@@ -58,7 +58,8 @@ while ($row = $query_favorit->fetch_assoc()) {
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="my-container">
+        
         <?php if ($result && $result->num_rows > 0): ?>
             <div class="daftar-lagu">
                 <?php 
@@ -67,27 +68,22 @@ while ($row = $query_favorit->fetch_assoc()) {
                     $id_lagu = $row['id'];
                     $apakah_favorit = in_array($id_lagu, $lagu_favorit_ids);
                 ?>
-                    <div class="item-lagu d-flex align-items-center">
-                        <span class="peringkat-lagu"><?= sprintf('%02d', $peringkat) ?></span>
-                        <img src="<?= htmlspecialchars($row['cover_image_url']) ?>" alt="Sampul" class="me-3 rounded-3" width="48" height="48">
-                        <div class="info-lagu flex-grow-1">
-                            <p class="judul-lagu mb-0"><?= htmlspecialchars($row['judul_lagu']) ?></p>
-                            <small class="text-white-50"><?= htmlspecialchars($row['nama_artis']) ?></small>
+                    <div class="item-lagu">
+                        <div class="d-flex align-items-center">
+                            <span class="peringkat-lagu"><?= sprintf('%02d', $peringkat) ?></span>
+                            <img src="<?= htmlspecialchars($row['cover_image_url']) ?>" alt="Sampul" class="me-3 rounded-3" width="48" height="48">
+                            <div class="flex-grow-1">
+                                <p class="judul-lagu"><?= htmlspecialchars($row['judul_lagu']) ?></p>
+                                <small class="text-white-50"><?= htmlspecialchars($row['nama_artis']) ?></small>
+                            </div>
                         </div>
                         <div class="d-flex align-items-center gap-3">
-                            <!-- Tombol Putar -->
-                            <button class="btn btn-sm p-0 tombolPlay" data-url-lagu="<?= htmlspecialchars($row['song_url']) ?>" data-id-lagu="<?= $id_lagu ?>">
-                                <i class="bi bi-play-circle-fill fs-4" style="color: #fff;"></i>
+                            <small class="text-white-50 me-2"><?= number_format($row['play_count']) ?></small>
+                            <button class="playPauseBtn" data-song-url="<?= htmlspecialchars($row['song_url']) ?>" data-song-id="<?= $id_lagu ?>">
+                                <i class="bi bi-play-circle-fill"></i>
                             </button>
-                            
-                            <!-- Tombol Favorit -->
-                            <button class="btn btn-sm text-white p-0 tombolFavorit" data-id-lagu="<?= $id_lagu ?>">
-                                <i class="bi <?= $apakah_favorit ? 'bi-heart-fill text-danger' : 'bi-heart' ?> fs-5"></i>
-                            </button>
-                            
-                            <!-- Menu Lainnya -->
-                            <button class="btn btn-link text-white p-0">
-                                <i class="bi bi-three-dots"></i>
+                            <button class="favorite-btn" data-song-id="<?= $id_lagu ?>">
+                                <i class="bi <?= $apakah_favorit ? 'bi-heart-fill text-danger' : 'bi-heart' ?>"></i>
                             </button>
                         </div>
                     </div>
@@ -97,94 +93,12 @@ while ($row = $query_favorit->fetch_assoc()) {
                 ?>
             </div>
         <?php else: ?>
-            <p>Tidak ada lagu terbaru.</p>
+            <p>Tidak ada lagu trending.</p>
         <?php endif; ?>
     </div>
 
-    <audio id="pemutarAudio"></audio>
+    <audio id="pemutarAudio" style="display:none;"></audio>
 
-    <script>
-        const pemutarAudio = document.getElementById("pemutarAudio");
-        let tombolSekarang = null;
-        let idLaguSekarang = null;
-
-        document.querySelectorAll(".tombolPlay").forEach(tombol => {
-            tombol.addEventListener("click", function() {
-                const urlLagu = this.dataset.urlLagu;
-                const idLagu = this.dataset.idLagu;
-                const ikon = this.querySelector("i");
-
-                // Jika lagu yang sama diklik
-                if (idLaguSekarang === idLagu) {
-                    if (pemutarAudio.paused) {
-                        pemutarAudio.play();
-                        ikon.classList.replace("bi-play-circle-fill", "bi-pause-circle-fill");
-                    } else {
-                        pemutarAudio.pause();
-                        ikon.classList.replace("bi-pause-circle-fill", "bi-play-circle-fill");
-                    }
-                    return;
-                }
-
-                // Lagu baru diklik
-                if (tombolSekarang) {
-                    const ikonSebelumnya = tombolSekarang.querySelector("i");
-                    ikonSebelumnya.classList.replace("bi-pause-circle-fill", "bi-play-circle-fill");
-                }
-
-                pemutarAudio.src = urlLagu;
-                pemutarAudio.play();
-                ikon.classList.replace("bi-play-circle-fill", "bi-pause-circle-fill");
-                
-                // Simpan riwayat pemutaran
-                fetch("simpan_riwayat_putar.php", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body: `id_lagu=${idLagu}&id_pengguna=<?= $user_id ?>`
-                });
-
-                tombolSekarang = this;
-                idLaguSekarang = idLagu;
-            });
-        });
-
-        pemutarAudio.addEventListener("ended", () => {
-            if (tombolSekarang) {
-                const ikon = tombolSekarang.querySelector("i");
-                ikon.classList.replace("bi-pause-circle-fill", "bi-play-circle-fill");
-            }
-            idLaguSekarang = null;
-            tombolSekarang = null;
-        });
-
-        // Fungsi tombol favorit
-        document.querySelectorAll(".tombolFavorit").forEach(tombol => {
-            tombol.addEventListener("click", function() {
-                const idLagu = this.dataset.idLagu;
-                const ikon = this.querySelector("i");
-                
-                fetch("simpan_favorit.php", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body: `id_lagu=${idLagu}&id_pengguna=<?= $user_id ?>`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.sukses) {
-                        ikon.classList.toggle("bi-heart");
-                        ikon.classList.toggle("bi-heart-fill");
-                        ikon.classList.toggle("text-danger");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                });
-            });
-        });
-    </script>
+<script src="audio-player.js"></script>
 </body>
 </html>

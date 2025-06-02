@@ -1,83 +1,219 @@
+/* ===== GLOBAL ===== */
 body {
-      background: linear-gradient(to bottom, #1f1f3a, #2b2b4a);
-      color: white;
-      min-height: 100vh;
-    }
-    .rounded-full {
-      border-radius: 9999px;
-    }
-    .scroll-x {
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-    .scroll-x button {
-      display: inline-block;
-      margin-right: 0.5rem;
-    }
-    .custom-placeholder::placeholder {
-    color: #c4c4c4; /* abu-abu */
-    opacity: 1; /* agar tidak transparan */
+  background: linear-gradient(to bottom, #1f1f3a, #2b2b4a);
+  color: white;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  padding-bottom: 80px; /* Antisipasi untuk footer */
+  padding-top: 80px;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.scroll-x {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.scroll-x button {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.custom-placeholder::placeholder {
+  color: #ccc !important;
+  opacity: 1;
+}
+
+/* ===== CONTAINER ===== */
+.my-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+/* ===== LAYOUT 2 KOLOM ===== */
+.container-row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.trending {
+  flex: 2;
+}
+
+.recommendation {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .container-row {
+    flex-direction: column;
   }
-  h1 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.8rem;
-  }
+}
 
-   .song-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
+/* ===== SECTION BOX ===== */
+.section {
+  background: #2f2f5a;
+  padding: 20px;
+  border-radius: 15px;
+  width: 100%;
+}
 
-    .song-left {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex: 1 1 auto;
-      min-width: 0;
-    }
+/* ===== TRENDING SONGS LIST ===== */
+.trending-songs {
+  display: flex;
+  flex-direction: column;
+}
 
-    .song-left img {
-      width: 48px;
-      height: 48px;
-      object-fit: cover;
-      border-radius: 0.5rem;
-    }
+.song-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(10px);
+  transition: background 0.3s, transform 0.3s;
+}
 
-    .song-info p {
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+audio {
+  max-width: 100%;
+}
 
-    .song-info small {
-      color: #ccc;
-    }
+.song-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.02);
+}
 
-    .song-right {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+.song-rank {
+  font-weight: bold;
+  font-size: 1.2rem;
+  width: 32px;
+  text-align: center;
+  color: #ccc;
+}
 
-    .song-right i {
-      font-size: 1.2rem;
-      color: #ccc;
-      cursor: pointer;
-    }
+.song-info {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-left: 12px;
+}
 
-    .song-right small {
-      color: #ccc;
-    }
+.song-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+}
 
-    .song-number {
-      width: 2rem;
-      text-align: right;
-      color: #aaa;
-      flex-shrink: 0;
-    }
-  
+.song-duration {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.song-item img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+
+/* ===== RECOMMENDATION GRID ===== */
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.recommendation-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: bold;
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
+  transition: background 0.3s;
+}
+
+.recommendation-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ===== TAB BUTTONS ===== */
+.tab-button {
+  padding: 6px 16px;
+  font-size: 0.875rem;
+  border-radius: 999px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  transition: background 0.3s, color 0.3s;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.tab-button:hover,
+.tab-button:focus {
+  background: linear-gradient(to right, #4b2bb3, #2d168f);
+  color: white;
+  outline: none;
+}
+
+.tab-button.active {
+  background: linear-gradient(to right, #4b2bb3, #2d168f);
+  color: white;
+}
+
+/* ===== NAVBAR FIX ===== */
+.navbar {
+  padding: 0;
+  width: 100%;
+}
+
+.navbar > .container-fluid {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.navbar-brand {
+  padding: 0.5rem 1rem;
+}
+
+.navbar-collapse {
+  padding: 0 1rem;
+}
+
+/* Hapus padding horizontal dari body */
+body {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Pastikan header full width */
+header.navbar {
+  width: 100vw;
+  left: 0;
+  right: 0;
+  padding: 0;
+  margin: 0;
+}

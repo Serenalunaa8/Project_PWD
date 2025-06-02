@@ -38,14 +38,16 @@
             <h1 style="text-align: center; font-weight: bold">Sign up to<br><span>start listening</span></h1>
             <form action="cekregist.php" method="POST">
     <div class="mb-3">
+
+        <label>Username</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+
         <label for="exampleFormControlInput1" class="form-label">Email address</label>
         <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com" name="email" required>
         
         <label for="password" class="pass">Password</label>
         <input type="password" id="inputPassword5" class="form-control" aria-describedby="passwordHelpBlock" name="password" required>
         
-        <label for="username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="user" name="user" required>
     </div>
     <button type="submit" class="next-button">Sign up</button>
     <p class="login-text">Already have an account? <a href="index.php">Log in here.</a></p>
